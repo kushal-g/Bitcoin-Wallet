@@ -1,6 +1,6 @@
 const bjl = require("bitcoinjs-lib");
 const bip32 = require("bip32");
-const axios = require("axios").default;
+const axios = require("axios");
 const b58 = require("bs58check");
 const coinselect = require("coinselect");
 const bip39 = require("bip39");
@@ -124,7 +124,7 @@ class Wallet {
   }
 
   generate_unsigned_transaction(xpub, output_address, amount) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const bcapi = new blockcypher("btc", "test3", this.token);
       const addresses = this.address_list(xpub, 0, 0, 0);
 
@@ -133,15 +133,13 @@ class Wallet {
         outputs: [{ addresses: [output_address], value: amount }],
       };
 
-      try {
-        const response = await axios.get(
-          "https://api.blockcypher.com/v1/btc/test3/txs/new",
-          { data: newtx }
-        );
-        console.log(response.data);
-      } catch (e) {
-        console.log(e.message, e.stack);
-      }
+      bcapi.newTX(newtx, (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          console.log(data);
+        }
+      });
     });
   }
 
